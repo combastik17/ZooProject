@@ -1,0 +1,33 @@
+services:
+  mysql:
+    container_name: project-mysql
+    env_file:
+      - ./.env
+    # expose:
+    #   - 3306
+    image: mysql:9.5-oraclelinux9
+    user: "1000:1000"
+    volumes:
+      - ./db/:/var/lib/mysql/:rw
+  php:
+    build: ./php/
+    command: php -S 0.0.0.0:8008
+    container_name: project-php
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8008"
+    volumes:
+      - ./src/:/srv/:rw
+    working_dir: /srv/
+  pma:
+    container_name: project-phpmyadmin
+    depends_on:
+      - mysql
+    environment:
+      - PMA_HOST=project-mysql
+      - PMA_PORT=3306
+      - PMA_SSL=1
+    image: phpmyadmin:5-apache
+    ports:
+      - "8081:80"
